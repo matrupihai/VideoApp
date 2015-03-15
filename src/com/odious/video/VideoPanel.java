@@ -63,7 +63,6 @@ public class VideoPanel extends JPanel implements VideoActions {
 	private Status status = Status.STOPPED;
 	private File videoFile;
 	private JLabel image;
-	private VideoFileManager videoFileManager;
 	private CvScalar color;
 	private float displayedNumber;
 	private int xPoint;
@@ -84,7 +83,7 @@ public class VideoPanel extends JPanel implements VideoActions {
 
 	public void setParams(VideoParams params) {
 		this.params = params;
-		videoFileManager = new VideoFileManager(params.getSettingsFilePath(), params.getGeoLocation());
+		VideoFileManager.setParams(params);
 	}
 	
 	@Override
@@ -144,7 +143,7 @@ public class VideoPanel extends JPanel implements VideoActions {
 		CvMemStorage storage = CvMemStorage.create();
 		grabbedImage = grabber.grab();
 		
-		videoFile = videoFileManager.getVideoFile();
+		videoFile = VideoFileManager.getVideoFile();
 		recorder = new OpenCVFrameRecorder(videoFile, RESOLUTION_WIDTH, RESOLUTION_HEIGHT); 
 //		recorder = FrameRecorder.createDefault(videoFile, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 		recorder.setVideoCodec(opencv_highgui.CV_FOURCC('M','P','4','2'));
@@ -205,8 +204,8 @@ public class VideoPanel extends JPanel implements VideoActions {
 					e.printStackTrace();
 				}
 		}
-		videoFileManager.deleteTempVideo();
-		videoFileManager.deleteScreenshotDir();
+		VideoFileManager.deleteTempVideo();
+		VideoFileManager.deleteScreenshotDir();
 	}
 	
 	private void getScreenshot() {
@@ -214,7 +213,7 @@ public class VideoPanel extends JPanel implements VideoActions {
 //			String modbusValue = ModbusReader.getValue();
 			String modbusValue = "256";
 			String fileLocation = "Saturn";
-			File screenshotDir = videoFileManager.getScrenshotDir();
+			File screenshotDir = VideoFileManager.getScrenshotDir();
 			DateFormat time = new SimpleDateFormat("hh_mm_ss");
 			
 			if (screenshotDir.exists()) {

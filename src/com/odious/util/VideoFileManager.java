@@ -6,18 +6,21 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class VideoFileManager {
-	private File mainDir, screenshotDir, videoFile;
-	private String filePath;
+	private static File mainDir, screenshotDir, videoFile;
+	private static String filePath;
 	
-	public VideoFileManager(String settingsFilePath, String geoLocation) {
+	public static void setParams(VideoParams params) {
+		String settingsFilePath = params.getSettingsFilePath();
+		String geoLocation = params.getGeoLocation();
+		
 		DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
 		DateFormat time = new SimpleDateFormat("hh_mm_ss");
+		String timestamp = time.format(new Date());
 		if (settingsFilePath.isEmpty()) {
 			mainDir = new File(System.getProperty("user.dir"), geoLocation + " " + date.format(new Date()));
 		} else {
 			mainDir = new File(settingsFilePath, geoLocation + " " + date.format(new Date()));
 		}
-		String timestamp = time.format(new Date());
 		if (!mainDir.exists()) {
 			if (mainDir.mkdir()) {
 				filePath = mainDir.getAbsolutePath() + "\\" + geoLocation +  " " + 
@@ -31,28 +34,29 @@ public class VideoFileManager {
 			screenshotDir = new File(mainDir.getAbsolutePath(), "foto " + geoLocation + " " + timestamp);
 			screenshotDir.mkdir();
 		}	
+		
 	}
 	
-	public void deleteScreenshotDir() {
-		System.out.println("SCREEENSHOT: " + screenshotDir.exists());
+	public static void deleteScreenshotDir() {
 		if (screenshotDir.exists() && screenshotDir.list().length == 0) {
 			screenshotDir.delete();
 		}
+		System.out.println("SCREEENSHOT DELETED: " + screenshotDir.exists());
 	}
 	
-	public void deleteTempVideo() {
-		System.out.println("VIDEO: " + videoFile);
+	public static void deleteTempVideo() {
 		if (videoFile != null && videoFile.length() < 1024) {
-			System.out.println("Temp file deleted: " + videoFile.delete());
+			videoFile.delete();
 		}
+		System.out.println("VIDEO DELETED: " + videoFile.getName());
 	}
 	
-	public File getVideoFile() {
+	public static File getVideoFile() {
 		videoFile = new File(filePath);
 		return videoFile;
 	}
 	
-	public File getScrenshotDir() {
+	public static File getScrenshotDir() {
 		return screenshotDir;
 	}
 	
