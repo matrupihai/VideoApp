@@ -39,14 +39,14 @@ public class SerialPanel extends JPanel {
 		ImageHelper imgHelper = new ImageHelper();
 		
 		try {
-			upActive = imgHelper.loadImageIcon("upActive.png");
-			upInactive = imgHelper.loadImageIcon("upInactive.png");
-			downActive = imgHelper.loadImageIcon("downActive.png");
-			downInactive = imgHelper.loadImageIcon("downInactive.png");
-			restActive = imgHelper.loadImageIcon("restActive.png");
-			restInactive = imgHelper.loadImageIcon("restInactive.png");
-			sensorOff = imgHelper.loadImageIcon("sensorOff.png");
-			sensorOn = imgHelper.loadImageIcon("sensorOn.png");
+			upActive = imgHelper.loadImage("upActive.png");
+			upInactive = imgHelper.loadImage("upInactive.png");
+			downActive = imgHelper.loadImage("downActive.png");
+			downInactive = imgHelper.loadImage("downInactive.png");
+			restActive = imgHelper.loadImage("restActive.png");
+			restInactive = imgHelper.loadImage("restInactive.png");
+			sensorOff = imgHelper.loadImage("sensorOff.png");
+			sensorOn = imgHelper.loadImage("sensorOn.png");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

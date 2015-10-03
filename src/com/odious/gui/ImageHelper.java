@@ -8,7 +8,7 @@ import javax.swing.ImageIcon;
 
 public class ImageHelper {
 
-	public ImageIcon loadImageIcon(String fileName) throws IOException {
+	public ImageIcon loadImage(String fileName) throws IOException {
 		BufferedImage image = ImageIO.read(this.getClass().getClassLoader()
 				.getResourceAsStream("com/odious/images/" + fileName));
 

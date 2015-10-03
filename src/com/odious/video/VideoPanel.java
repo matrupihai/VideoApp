@@ -23,6 +23,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
@@ -38,7 +39,7 @@ import com.googlecode.javacv.cpp.opencv_highgui;
 import com.googlecode.javacv.cpp.opencv_objdetect;
 import com.odious.modbus.ModbusReader;
 import com.odious.panel.SettingsDialog;
-import com.odious.util.VideoFileManager;
+import com.odious.util.FileManager;
 import com.odious.util.VideoParams;
 
 public class VideoPanel extends JPanel implements VideoActions {
@@ -83,7 +84,7 @@ public class VideoPanel extends JPanel implements VideoActions {
 
 	public void setParams(VideoParams params) {
 		this.params = params;
-		VideoFileManager.setParams(params);
+		FileManager.INSTANCE.setParams(params);
 	}
 	
 	@Override
@@ -130,20 +131,17 @@ public class VideoPanel extends JPanel implements VideoActions {
 		this.deviceId = deviceId;
 		this.status = Status.STARTED;
 		Loader.load(opencv_objdetect.class);
-		try {
-			grabber = FrameGrabber.createDefault(deviceId);
-			grabber.setImageWidth(RESOLUTION_WIDTH);
-			grabber.setImageHeight(RESOLUTION_HEIGHT);
-			grabber.setFrameRate(params.getFramerate());
-			grabber.start();
-		} catch (FrameGrabber.Exception e) {
-			e.printStackTrace();
-		}
+
+		grabber = FrameGrabber.createDefault(deviceId);
+		grabber.setImageWidth(RESOLUTION_WIDTH);
+		grabber.setImageHeight(RESOLUTION_HEIGHT);
+		grabber.setFrameRate(params.getFramerate());
+		grabber.start();
 		
 		CvMemStorage storage = CvMemStorage.create();
 		grabbedImage = grabber.grab();
 		
-		videoFile = VideoFileManager.getVideoFile();
+		videoFile = FileManager.INSTANCE.getVideoFile();
 		recorder = new OpenCVFrameRecorder(videoFile, RESOLUTION_WIDTH, RESOLUTION_HEIGHT); 
 //		recorder = FrameRecorder.createDefault(videoFile, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 		recorder.setVideoCodec(opencv_highgui.CV_FOURCC('M','P','4','2'));
@@ -199,21 +197,20 @@ public class VideoPanel extends JPanel implements VideoActions {
 					recorder.stop();
 					grabber.stop();
 					status = Status.STOPPED;
-				} catch (com.googlecode.javacv.FrameRecorder.Exception
-						| com.googlecode.javacv.FrameGrabber.Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 		}
-		VideoFileManager.deleteTempVideo();
-		VideoFileManager.deleteScreenshotDir();
+		FileManager.INSTANCE.deleteTempVideo();
+		FileManager.INSTANCE.deleteScreenshotDir();
 	}
 	
 	private void getScreenshot() {
-		if (grabbedImage != null) {
+		if (status != Status.STOPPED && grabbedImage != null) {
 //			String modbusValue = ModbusReader.getValue();
 			String modbusValue = "256";
 			String fileLocation = "Saturn";
-			File screenshotDir = VideoFileManager.getScrenshotDir();
+			File screenshotDir = FileManager.INSTANCE.getScrenshotDir();
 			DateFormat time = new SimpleDateFormat("hh_mm_ss");
 			
 			if (screenshotDir.exists()) {
@@ -311,13 +308,14 @@ public class VideoPanel extends JPanel implements VideoActions {
 	public class CameraSwingWorker extends SwingWorker<String, Object> {
 		@Override
 		protected String doInBackground() throws Exception {
-				try {
-					start(deviceId);
-				} catch (com.googlecode.javacv.FrameGrabber.Exception
-						| com.googlecode.javacv.FrameRecorder.Exception e) {
-					e.printStackTrace();
-					System.out.println("Error starting camera.");
-				}
+			try {
+				start(deviceId);
+			} catch (com.googlecode.javacv.FrameGrabber.Exception
+					| com.googlecode.javacv.FrameRecorder.Exception e) {
+				JOptionPane.showMessageDialog(null, "Error starting camera.");
+				clearVideoResources();
+			}
+
 			return "Camera started";
 		}
 	}

@@ -30,7 +30,7 @@ public class VideoParams implements PropertyChangeListener {
 		switch (evt.getPropertyName()) {
 		case "FILEPATH":
 			this.settingsFilePath = (String) evt.getNewValue();
-			VideoFileManager.setParams(this);
+			FileManager.INSTANCE.setParams(this);
 			break;
 		case "FONTSIZE":
 			this.fontSize = (Double) evt.getNewValue();

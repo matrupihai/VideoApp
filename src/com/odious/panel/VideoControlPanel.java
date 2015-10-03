@@ -60,13 +60,13 @@ public class VideoControlPanel extends JPanel {
 		ImageHelper imgHelper = new ImageHelper();
 
 		try {
-			sensorOff = imgHelper.loadImageIcon("sensorOff.png");
-			sensorOn = imgHelper.loadImageIcon("sensorOn.png");
-			record = imgHelper.loadImageIcon("record.png");
-			hoverPause = imgHelper.loadImageIcon("hoverPause.png");
-			pressedPause = imgHelper.loadImageIcon("pressedPause.png");
-			hoverPauseRed = imgHelper.loadImageIcon("hoverPauseRed.png");
-			hoverRecord = imgHelper.loadImageIcon("hoverRecord.png");
+			sensorOff = imgHelper.loadImage("sensorOff.png");
+			sensorOn = imgHelper.loadImage("sensorOn.png");
+			record = imgHelper.loadImage("record.png");
+			hoverPause = imgHelper.loadImage("hoverPause.png");
+			pressedPause = imgHelper.loadImage("pressedPause.png");
+			hoverPauseRed = imgHelper.loadImage("hoverPauseRed.png");
+			hoverRecord = imgHelper.loadImage("hoverRecord.png");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -75,11 +75,12 @@ public class VideoControlPanel extends JPanel {
 	public VideoControlPanel() {
 		JPanel panelControls = new JPanel(new MigLayout());
 		panelControls.setBorder(BorderFactory.createLineBorder(MainPanel.BASE_COLOR, 1));
+		
 		VideoHelper.detectVideoDevices();
 		comboDevices = new JComboBox<String>();
-		comboModel = new CustomComboBoxModel(
-				VideoHelper.getDevices());
+		comboModel = new CustomComboBoxModel(VideoHelper.getDevices());
 		comboDevices.setModel(comboModel);
+		
 		Dimension comboDimension = new Dimension(160, 30);
 		comboDevices.setMinimumSize(comboDimension);
 		comboDevices.setMaximumSize(comboDimension);
@@ -144,11 +145,13 @@ public class VideoControlPanel extends JPanel {
 		paramPanel.add(refreshButton, "west");
 		paramPanel.add(comboDevices, "west");
 		paramPanel.add(sensorLabel, "west, gapleft 20");
+
 		JPanel buttonPanel = new JPanel(new MigLayout());
 		buttonPanel.add(playButton, "west");
 		buttonPanel.add(recordButton, "west");
 		buttonPanel.add(stopButton, "west");
 		buttonPanel.add(screenshotButton, "west");
+		
 		panelControls.add(paramPanel, "wrap");
 		panelControls.add(buttonPanel, "wrap");
 		panelControls.add(containerChronometer, "top, center, wrap");
@@ -188,7 +191,6 @@ public class VideoControlPanel extends JPanel {
 				video.invert(isInvert());
 			}
 		});
-		
 		
 		JButton defaultButton = new JButton("Default");
 		defaultButton.addActionListener(new ActionListener() {
@@ -237,16 +239,12 @@ public class VideoControlPanel extends JPanel {
 
 	protected void stopAction() {
 		Status status = video.getStatus();
-		if (Status.RECORDING.equals(status) || Status.PAUSED.equals(status)) {
-			int option = JOptionPane.showConfirmDialog(getRootPane(),
-					"Stop recording?");
+		boolean isActive = Status.RECORDING.equals(status) || Status.PAUSED.equals(status) || Status.STARTED.equals(status);
+		if (isActive) {
+			int option = JOptionPane.showConfirmDialog(getRootPane(), "Stop video?");
 			if (option == JOptionPane.YES_OPTION) {
 				video.stop();
-				sensorLabel.setIcon(sensorOff);
-				recordButton.setIcon(record);
-				recordButton.setRolloverIcon(hoverRecord);
-				chronoLabel.setForeground(MainPanel.BASE_COLOR);
-				chronoLabel.repaint();
+				setVisualsAtStop();
 				Chronometer.stop();
 				Chronometer.delayTime = 0;
 				if (timerChronos != null) {
@@ -256,24 +254,32 @@ public class VideoControlPanel extends JPanel {
 			}
 		}
 	}
+
+	private void setVisualsAtStop() {
+		sensorLabel.setIcon(sensorOff);
+		recordButton.setIcon(record);
+		recordButton.setRolloverIcon(hoverRecord);
+		chronoLabel.setForeground(MainPanel.BASE_COLOR);
+		chronoLabel.repaint();
+	}
 	
 	protected void playAction() {
-		if (!comboModel.getElementAt(0).equals(VideoHelper.NO_SOURCE)) {
-			if (video != null && video.getStatus() == Status.STOPPED) {
-				final VideoPanel.CameraSwingWorker camera = video.new CameraSwingWorker();
-				camera.execute();
-				System.out.println("Camera started!");
-				// startSerial();
-				chronoLabel.setText("0:0:0");
-				KeyboardFocusManager manager = KeyboardFocusManager
-						.getCurrentKeyboardFocusManager();
-				// manager.addKeyEventDispatcher(video.new
-				// CustomDispatcher());
-			}
-		} else {
+		if (comboModel.getElementAt(0).equals(VideoHelper.NO_SOURCE)) {
 			JOptionPane.showMessageDialog(getRootPane(),
 					"No video source!", "Error",
 					JOptionPane.ERROR_MESSAGE);
+		}
+		
+		if (video != null && video.getStatus() == Status.STOPPED) {
+			final VideoPanel.CameraSwingWorker camera = video.new CameraSwingWorker();
+			camera.execute();
+			System.out.println("Camera started!");
+			// startSerial();
+			chronoLabel.setText("0:0:0");
+			KeyboardFocusManager manager = KeyboardFocusManager
+					.getCurrentKeyboardFocusManager();
+			// manager.addKeyEventDispatcher(video.new
+			// CustomDispatcher());
 		}
 	}
 	
